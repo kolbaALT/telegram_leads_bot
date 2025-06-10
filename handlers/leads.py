@@ -8,7 +8,6 @@ router = Router()
 
 @router.message(F.text == "/leads")
 async def cmd_leads(message: Message):
-    # Проверяем, что пользователь — менеджер
     if str(message.from_user.id) != str(MANAGER_USER_ID):
         await message.answer("У вас нет доступа к этой команде.")
         logger.warning(f"Пользователь {message.from_user.id} попытался получить доступ к /leads")

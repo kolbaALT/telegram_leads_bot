@@ -11,7 +11,6 @@ from keyboards.keyboards import cancel_keyboard, new_lead_keyboard, remove_keybo
 
 router = Router()
 
-# Вспомогательная функция для обработки "Отменить"
 async def check_cancel(message: Message, state: FSMContext):
     if message.text == "❌ Отменить":
         await state.clear()
@@ -19,7 +18,6 @@ async def check_cancel(message: Message, state: FSMContext):
         return True
     return False
 
-# Старт формы — приветствие и запрос имени
 @router.message(F.text == "/start")
 async def cmd_start(message: Message, state: FSMContext):
     await state.clear()
@@ -30,7 +28,6 @@ async def cmd_start(message: Message, state: FSMContext):
     await state.set_state(LeadForm.waiting_for_name)
     logger.info(f"Пользователь {message.from_user.id} начал заполнение заявки.")
 
-# Получение имени
 @router.message(LeadForm.waiting_for_name)
 async def process_name(message: Message, state: FSMContext):
     if await check_cancel(message, state):
@@ -42,7 +39,6 @@ async def process_name(message: Message, state: FSMContext):
     )
     await state.set_state(LeadForm.waiting_for_phone)
 
-# Валидация телефона
 @router.message(LeadForm.waiting_for_phone)
 async def process_phone(message: Message, state: FSMContext):
     if await check_cancel(message, state):
@@ -58,7 +54,6 @@ async def process_phone(message: Message, state: FSMContext):
     )
     await state.set_state(LeadForm.waiting_for_request)
 
-# Получение запроса и завершение формы
 @router.message(LeadForm.waiting_for_request)
 async def process_request(message: Message, state: FSMContext, bot):
     if await check_cancel(message, state):
@@ -68,11 +63,9 @@ async def process_request(message: Message, state: FSMContext, bot):
     phone = data["phone"]
     request_message = message.text
 
-    # Сохраняем заявку в базу данных
     await add_lead(name, phone, request_message)
     logger.info(f"Заявка от {name} ({phone}) сохранена.")
 
-    # Уведомляем менеджера
     notification = (
         f"Новая заявка!\n"
         f"Имя: {name}\n"
@@ -88,7 +81,6 @@ async def process_request(message: Message, state: FSMContext, bot):
     )
     await state.clear()
 
-# Обработка кнопки "Заполнить новую заявку"
 @router.message(F.text == "📝 Заполнить новую заявку")
 async def new_lead(message: Message, state: FSMContext):
     await state.clear()
